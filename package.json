@@ -1,0 +1,23 @@
+{
+  "name": "ethereum-gas-oracle",
+  "description": "",
+  "license": "Unlicense",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zoltu/ethereum-gas-oracle.git"
+  },
+  "dependencies": {
+    "@types/collections": "5.0.0",
+    "@types/koa2-cors": "^2.0.1",
+    "@types/node": "9.3.0",
+    "@types/node-fetch": "1.6.7",
+    "collections": "5.1.2",
+    "ethereumjs-blockstream": "3.0.0",
+    "koa": "2.4.1",
+    "koa2-cors": "2.0.5",
+    "node-fetch": "1.7.3",
+    "typescript": "2.6.2"
+  }
+}
