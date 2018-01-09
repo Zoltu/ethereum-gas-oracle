@@ -9,6 +9,7 @@ RUN npm install
 COPY . /app/
 RUN npx tsc
 
+EXPOSE 80
 ENV ETHEREUM_URL http://localhost:8545/
 
 ENTRYPOINT [ "node", "output/WebServer.js" ]
