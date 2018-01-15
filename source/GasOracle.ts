@@ -29,11 +29,11 @@ export class GasOracle {
 
 	public constructor(ethereumUrl: string) {
 		this.ethereumUrl = ethereumUrl;
-		this.blockAndLogStreamer = new BlockAndLogStreamer(this.getBlock, this.getLogs);
+		this.blockAndLogStreamer = new BlockAndLogStreamer(this.getBlock, this.getLogs, { blockRetention: 500 });
 		this.blockAndLogStreamer.subscribeToOnBlockAdded(this.onBlockAdded);
 		this.blockAndLogStreamer.subscribeToOnBlockRemoved(this.onBlockRemoved);
-		this.getLatestBlock();
-		setInterval(() => this.getLatestBlock(), 1000);
+		this.reconcileAgedBlock(50)
+			.then(() => setInterval(() => this.reconcileLatestBlock(), 1000));
 	}
 
 	public getPercentile = async (percentile: number): Promise<number> => {
@@ -49,7 +49,7 @@ export class GasOracle {
 	}
 
 	private onBlockAdded = (block: Block) => {
-		console.log(`Block ${block.hash} seen.`);
+		console.log(`Block ${block.hash} (${parseInt(block.number, 16)}) seen.`);
 		const prices = block.transactions
 			.filter(transaction => transaction.from !== block.miner)
 			.map(transaction => parseInt(transaction.gasPrice, 16));
@@ -66,19 +66,46 @@ export class GasOracle {
 		if (poppedBlock.hash !== block.hash) throw new Error(`Received notification to remove block ${block.hash} but found ${poppedBlock.hash} on the top of the stack.`);
 	}
 
-	private getLatestBlock = async () => {
+	private getAgedBlock = async (numBlocksBack: number) => {
+		const latestBlock = await this.getLatestBlock();
+		const targetBlock = Math.max(0, parseInt(latestBlock.number, 16) - numBlocksBack);
+		return await this.getBlockByNumber(targetBlock);
+	}
+
+	private getLatestBlock = async (): Promise<Block> => {
+		return await this.getBlockByNumber('latest');
+	}
+
+	private getBlockByNumber = async (blockNumber: number|'latest') => {
+		let param = (typeof blockNumber === 'number')
+			? `0x${blockNumber.toString(16)}`
+			: blockNumber;
+		const payload = {
+			jsonrpc: '2.0',
+			id: 1,
+			method: 'eth_getBlockByNumber',
+			params: [param, true],
+		};
+		const response = await fetch(this.ethereumUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+		const result = <JsonRpcResponse<Block>>await response.json();
+		if (result.error) throw new Error(`Failed to fetch first block: ${result.error.code}\n${result.error.message}`);
+		if (!result.result) throw new Error(`Received unexpected response:\n${result}`);
+		return result.result;
+	}
+
+	private reconcileLatestBlock = async (): Promise<void> => {
 		try {
-			const payload = {
-				jsonrpc: '2.0',
-				id: 1,
-				method: 'eth_getBlockByNumber',
-				params: ['latest', true],
-			};
-			const response = await fetch(this.ethereumUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-			const result = <JsonRpcResponse<Block>>await response.json();
-			if (result.error) throw new Error(`Failed to fetch first block: ${result.error.code}\n${result.error.message}`);
-			if (!result.result) throw new Error(`Received unexpected response:\n${result}`);
-			this.blockAndLogStreamer.reconcileNewBlock(result.result);
+			const block = await this.getLatestBlock();
+			this.blockAndLogStreamer.reconcileNewBlock(block);
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	private reconcileAgedBlock = async (blockAge: number): Promise<void> => {
+		try {
+			const block = await this.getAgedBlock(blockAge);
+			this.blockAndLogStreamer.reconcileNewBlock(block);
 		} catch (error) {
 			console.log(error);
 		}
