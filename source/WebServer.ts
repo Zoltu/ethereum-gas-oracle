@@ -16,9 +16,14 @@ new Koa()
 	.use(async context => {
 		context.body = {
 			number_of_blocks: await gasOracle.getNumberOfBlocks(),
-			percentile_1: `${await gasOracle.getPercentile(1) / 10**9} nanoeth`
 		}
-		for (let i = 5; i <= 100; i+=5) {
+		for (let i = 1; i <= 4; ++i) {
+			context.body[`percentile_${i}`] = `${await gasOracle.getPercentile(i) / 10**9} nanoeth`;
+		}
+		for (let i = 5; i <= 95; i+=5) {
+			context.body[`percentile_${i}`] = `${await gasOracle.getPercentile(i) / 10**9} nanoeth`;
+		}
+		for (let i = 96; i <= 100; ++i) {
 			context.body[`percentile_${i}`] = `${await gasOracle.getPercentile(i) / 10**9} nanoeth`;
 		}
 	})
