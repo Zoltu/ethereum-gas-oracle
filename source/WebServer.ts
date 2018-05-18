@@ -16,6 +16,7 @@ new Koa()
 	.use(async context => {
 		context.body = {
 			number_of_blocks: await gasOracle.getNumberOfBlocks(),
+			latest_block_number: await gasOracle.getLatestBlockNumber(),
 		}
 		for (let i = 1; i <= 4; ++i) {
 			context.body[`percentile_${i}`] = `${await gasOracle.getPercentile(i) / 10**9} nanoeth`;

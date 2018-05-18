@@ -33,6 +33,7 @@ export class GasOracle {
 		this.blockAndLogStreamer.subscribeToOnBlockAdded(this.onBlockAdded);
 		this.blockAndLogStreamer.subscribeToOnBlockRemoved(this.onBlockRemoved);
 		this.reconcileAgedBlock(50)
+			// the interval lambda is intentionally not async, `reconcileLatestBlock` catches and swallows all errors
 			.then(() => setInterval(() => this.reconcileLatestBlock(), 1000));
 	}
 
@@ -46,6 +47,11 @@ export class GasOracle {
 
 	public getNumberOfBlocks = async (): Promise<number> => {
 		return this.blockMinGasPrices.length;
+	}
+
+	public getLatestBlockNumber = () => {
+		const maybeLatestBlock = this.blockAndLogStreamer.getLatestReconciledBlock();
+		return (maybeLatestBlock !== null) ? parseInt(maybeLatestBlock.number, 16) : 0;
 	}
 
 	private onBlockAdded = (block: Block) => {
@@ -96,7 +102,7 @@ export class GasOracle {
 	private reconcileLatestBlock = async (): Promise<void> => {
 		try {
 			const block = await this.getLatestBlock();
-			this.blockAndLogStreamer.reconcileNewBlock(block);
+			await this.blockAndLogStreamer.reconcileNewBlock(block);
 		} catch (error) {
 			console.log(error);
 		}
@@ -105,7 +111,7 @@ export class GasOracle {
 	private reconcileAgedBlock = async (blockAge: number): Promise<void> => {
 		try {
 			const block = await this.getAgedBlock(blockAge);
-			this.blockAndLogStreamer.reconcileNewBlock(block);
+			await this.blockAndLogStreamer.reconcileNewBlock(block);
 		} catch (error) {
 			console.log(error);
 		}
