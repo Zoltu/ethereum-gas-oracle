@@ -8,5 +8,5 @@ docker image build -t gas-price-oracle .
 
 ## Run
 ```bash
-docker container run -p 1234:80 -e ETHEREUM_URL=http://localhost:8545 gas-price-oracle
+docker container run -p 1234:80 -e ETHEREUM_URL=http://localhost:8545 zoltu/ethereum-gas-oracle
 ```
