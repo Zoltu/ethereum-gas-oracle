@@ -12,6 +12,7 @@ interface JsonRpcResponse<T> {
 interface Transaction {
 	gasPrice: string;
 	from: string;
+	gas: string;
 }
 
 interface Block {
@@ -56,7 +57,13 @@ export class GasOracle {
 
 	private onBlockAdded = (block: Block) => {
 		console.log(`Block ${block.hash} (${parseInt(block.number, 16)}) seen.`);
+		let temp = 0
 		const prices = block.transactions
+			.sort((first, second) => parseInt(first.gasPrice, 16) - parseInt(second.gasPrice, 16))
+			.filter(transaction => {
+				temp += parseInt(transaction.gas, 16);
+				return temp > 1000000;
+			})
 			.filter(transaction => transaction.from !== block.miner)
 			.map(transaction => parseInt(transaction.gasPrice, 16));
 		const minPrice = Math.min(...prices);
