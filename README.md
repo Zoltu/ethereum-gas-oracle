@@ -3,7 +3,7 @@ Simple little web server that responds to GET requests with the percent of block
 
 ## Build
 ```bash
-docker image build -t gas-price-oracle .
+docker image build -t zoltu/ethereum-gas-oracle .
 ```
 
 ## Run
