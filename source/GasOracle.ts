@@ -37,7 +37,7 @@ export class GasOracle {
 			.then(() => setInterval(() => this.reconcileLatestBlock(), 1000));
 	}
 
-	public getPercentile = async (percentile: number): Promise<number> => {
+	public getPercentile = (percentile: number): number => {
 		if (percentile > 100 || percentile < 1) throw new Error(`Percentile must be between 1 and 100.`);
 		const sorted = this.blockMinGasPrices.map(x => x.minGas).sort((a, b) => a - b);
 		if (sorted.length <= 0) throw new Error(`Please wait until the service has fetched at least one block.`);
@@ -45,7 +45,7 @@ export class GasOracle {
 		return sorted[index];
 	}
 
-	public getNumberOfBlocks = async (): Promise<number> => {
+	public getNumberOfBlocks = (): number => {
 		return this.blockMinGasPrices.length;
 	}
 

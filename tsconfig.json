@@ -6,13 +6,19 @@
 		"sourceMap": true,
 		"outDir": "output",
 		"rootDir": "source",
+		"declaration": true,
+		"lib": [
+			"es2015",
+			"es2016",
+			"es2017",
+		],
 		"paths": {
 			"*": [
-				"./typings/*"
+				"./typings/*",
 			]
 		},
 		"strict": true,
 		"experimentalDecorators": true,
-		"alwaysStrict": true
+		"alwaysStrict": true,
 	}
 }
