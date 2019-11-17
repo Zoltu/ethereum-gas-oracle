@@ -127,7 +127,7 @@ export class GasOracle {
 		const response = await fetch(this.ethereumUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
 		const result = <JsonRpcResponse<Block>>await response.json();
 		if (result.error) throw new Error(`Failed to fetch block with hash ${hash}: ${result.error.code}\n${result.error.message}`);
-		if (!result.result) throw new Error(`Received unexpected response:\n${JSON.stringify(result, null, '\t')}`);
+		if (!result.result) throw new Error(`Received unexpected response:\n${JSON.stringify(payload, null, '\t')}\n${JSON.stringify(result, null, '\t')}`);
 		return result.result;
 	}
 
