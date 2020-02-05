@@ -8,7 +8,11 @@ process.on('SIGTERM', () => process.exit());
 
 const ethereumUrl = process.env.ETHEREUM_URL;
 if (!ethereumUrl) throw new Error('ETHEREUM_URL environment variable must be defined.');
-const gasOracle = new GasOracle(ethereumUrl);
+const pollingFrequencySecondsString = process.env.POLLING_FREQUENCY_SECONDS;
+if (!pollingFrequencySecondsString) throw new Error(`POLLING_FREQUENCY_SECONDS environment variable must be defined.`)
+const pollingFrequencySeconds = Number.parseFloat(pollingFrequencySecondsString)
+if (pollingFrequencySeconds <= 0 || pollingFrequencySeconds > 3600 || !Number.isInteger(pollingFrequencySeconds)) throw new Error(`POLLING_FREQUENCY_SECONDS must be an integer number of seconds between 1 and 3600`)
+const gasOracle = new GasOracle(ethereumUrl, pollingFrequencySeconds);
 
 new Koa()
 	.use(errorHandler)

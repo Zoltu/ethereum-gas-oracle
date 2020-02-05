@@ -27,14 +27,14 @@ export class GasOracle {
 	private readonly blockAndLogStreamer: BlockAndLogStreamer<Block, Log>;
 	private readonly blockMinGasPrices = new Deque<{ hash: string, minGas: number }>();
 
-	public constructor(ethereumUrl: string) {
+	public constructor(ethereumUrl: string, pollingFrequency: number) {
 		this.ethereumUrl = ethereumUrl;
 		this.blockAndLogStreamer = new BlockAndLogStreamer(this.getBlock, this.getLogs, { blockRetention: 500 });
 		this.blockAndLogStreamer.subscribeToOnBlockAdded(this.onBlockAdded);
 		this.blockAndLogStreamer.subscribeToOnBlockRemoved(this.onBlockRemoved);
 		this.reconcileAgedBlock(50)
 			// the interval lambda is intentionally not async, `reconcileLatestBlock` catches and swallows all errors
-			.then(() => setInterval(() => this.reconcileLatestBlock(), 1000));
+			.then(() => setInterval(() => this.reconcileLatestBlock(), pollingFrequency * 1000));
 	}
 
 	public getPercentile = async (percentile: number): Promise<number> => {
