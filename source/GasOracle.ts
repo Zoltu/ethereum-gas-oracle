@@ -29,7 +29,7 @@ export class GasOracle {
 
 	public constructor(ethereumUrl: string, pollingFrequency: number) {
 		this.ethereumUrl = ethereumUrl;
-		this.blockAndLogStreamer = new BlockAndLogStreamer(this.getBlock, this.getLogs, { blockRetention: 500 });
+		this.blockAndLogStreamer = new BlockAndLogStreamer(this.getBlockByHash, this.getLogs, console.error, { blockRetention: 500 });
 		this.blockAndLogStreamer.subscribeToOnBlockAdded(this.onBlockAdded);
 		this.blockAndLogStreamer.subscribeToOnBlockRemoved(this.onBlockRemoved);
 		this.reconcileAgedBlock(50)
@@ -117,7 +117,7 @@ export class GasOracle {
 		}
 	}
 
-	private getBlock = async (hash: string) => {
+	private getBlockByHash = async (hash: string) => {
 		const payload = {
 			jsonrpc: '2.0',
 			id: 1,
