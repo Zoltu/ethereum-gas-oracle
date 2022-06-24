@@ -16,7 +16,7 @@
     "ethereumjs-blockstream": "7.0.0",
     "koa": "2.4.1",
     "koa2-cors": "2.0.5",
-    "node-fetch": "2.6.1",
+    "node-fetch": "2.6.7",
     "typescript": "3.9.7"
   }
 }
